@@ -372,6 +372,26 @@ public class ProfNetwork {
       }
    }//end
 
+   // self defined functions
+   public static void FriendList(ProfNetwork esql){
+    System.out.println("you didn't do this yet niggaaaaa");
+   }
+
+   // self defined functions
+   public static void UpdateProfile(ProfNetwork esql){
+    System.out.println("you didn't do this yet niggaaaaa");
+   }
+
+   // self defined functions
+   public static void NewMessage(ProfNetwork esql){
+    System.out.println("you didn't do this yet niggaaaaa");
+   }
+
+   // self defined functions
+   public static void SendRequest(ProfNetwork esql){
+    System.out.println("you didn't do this yet niggaaaaa");
+   }
+
 // Rest of the functions definition go in here
 
 }//end ProfNetwork
