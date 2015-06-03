@@ -285,6 +285,7 @@ public class ProfNetwork {
             }
          }//end while
       }catch(Exception e) {
+		 System.out.println("skipped over the whole try block in main");
          System.err.println (e.getMessage ());
       }finally{
          // make sure to cleanup the created table and close the connection.
