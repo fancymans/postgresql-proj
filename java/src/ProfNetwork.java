@@ -340,10 +340,12 @@ public class ProfNetwork {
             String password = in.readLine();
             System.out.print("\tEnter user email: ");
             String email = in.readLine();
+            System.out.print("\tEnter user date of birth: ");
+            String dob = in.readLine();
 
             //Creating empty contact\block lists for a user
-            String query = String.format("INSERT INTO USR (userId, password, email, contact_list) VALUES ('%s','%s','%s')", login, password, email);
-
+            String query = String.format("INSERT INTO USR (userId, password, email, dateOfBirth) VALUES ('%s','%s','%s','%s')", login, password, email, dob);
+            System.out.println(query);
             esql.executeUpdate(query);
             System.out.println ("User successfully created!");
         } catch(Exception e) {
@@ -383,19 +385,19 @@ public class ProfNetwork {
     // self defined functions
     // ---------------------------------------------------------------------
     public static void FriendList(ProfNetwork esql) {
-        System.out.println("you didn't do this yet niggaaaaa");
+        System.out.println("you didn't do this yet");
     }
 
     public static void UpdateProfile(ProfNetwork esql) {
-        System.out.println("you didn't do this yet niggaaaaa");
+        System.out.println("you didn't do this yet");
     }
 
     public static void NewMessage(ProfNetwork esql) {
-        System.out.println("you didn't do this yet niggaaaaa");
+        System.out.println("you didn't do this yet");
     }
 
     public static void SendRequest(ProfNetwork esql) {
-        System.out.println("you didn't do this yet niggaaaaa");
+        System.out.println("you didn't do this yet");
     }
 
 
