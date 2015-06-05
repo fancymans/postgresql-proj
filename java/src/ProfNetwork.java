@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
 * This class defines a simple embedded SQL utility class that is designed to
@@ -157,7 +158,10 @@ public class ProfNetwork {
     while (rs.next()) {
         List<String> record = new ArrayList<String>();
         for (int i=1; i<=numCol; ++i)
+        {
             record.add(rs.getString (i));
+            System.out.println(rs.getString(i));
+        }
         result.add(record);
     }//end while
     stmt.close ();
@@ -340,14 +344,15 @@ public class ProfNetwork {
             String password = in.readLine();
             System.out.print("\tEnter user email: ");
             String email = in.readLine();
-            System.out.print("\tEnter user date of birth: ");
+            System.out.print("\tEnter user name: ");
+            String name = in.readLine();
+            System.out.print("\tEnter user date of birth (MM/DD/YYYY): ");
             String dob = in.readLine();
 
             //Creating empty contact\block lists for a user
-            String query = String.format("INSERT INTO USR (userId, password, email, dateOfBirth) VALUES ('%s','%s','%s','%s')", login, password, email, dob);
-            System.out.println(query);
+            String query = String.format("INSERT INTO USR (userId, password, email, name, dateOfBirth) VALUES ('%s','%s','%s','%s','%s')", login, password, email, name, dob);
             esql.executeUpdate(query);
-            System.out.println ("User successfully created!");
+            System.out.println ("User " + login + " successfully created!\n");
         } catch(Exception e) {
             System.err.println (e.getMessage ());
         }
@@ -366,8 +371,12 @@ public class ProfNetwork {
 
             String query = String.format("SELECT * FROM USR WHERE userId = '%s' AND password = '%s'", login, password);
             int userNum = esql.executeQuery(query);
+
             if (userNum > 0)
+            {
+                System.out.println("WELCOME " + login + "\n\n");
                 return login;
+            }
             return null;
         } catch(Exception e) {
             System.err.println (e.getMessage ());
