@@ -382,7 +382,7 @@ public class ProfNetwork {
             }
             else
             {
-                System.out.println("Username or Password is wrong.");
+                System.out.println("Username or Password is wrong.\n");
             }
             return null;
         } catch(Exception e) {
@@ -408,14 +408,15 @@ public class ProfNetwork {
             String newpw2 = in.readLine();
             if(newpw.equals(newpw2)){
                 String query = String.format("UPDATE USR SET password = '%s' WHERE userId = '%s'", newpw, current_user);
-                int userNum = esql.executeQuery(query);
+                esql.executeQuery(query);
+                break;
             }
             else
-                System.out.println("New password did not match");
+                System.out.println("New password did not match\n");
         }
         catch(Exception e)
         {
-            System.out.println("UPDATED PASSWORD SUCCESSFUL"); 
+            System.out.println("UPDATED PASSWORD SUCCESSFUL\n"); 
         }
     }
 
