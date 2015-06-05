@@ -95,37 +95,38 @@ public class ProfNetwork {
     * @throws java.sql.SQLException when failed to execute the query
     */
     public int executeQueryAndPrintResult (String query) throws SQLException {
-    // creates a statement object
+        // creates a statement object
         Statement stmt = this._connection.createStatement ();
 
-    // issues the query instruction
+        // issues the query instruction
         ResultSet rs = stmt.executeQuery (query);
 
-    /*
-    ** obtains the metadata object for the returned result set.  The metadata
-    ** contains row and column info.
-    */
-    ResultSetMetaData rsmd = rs.getMetaData ();
-    int numCol = rsmd.getColumnCount ();
-    int rowCount = 0;
+        /*
+        ** obtains the metadata object for the returned result set.  The metadata
+        ** contains row and column info.
+        */
+        ResultSetMetaData rsmd = rs.getMetaData ();
+        int numCol = rsmd.getColumnCount ();
+        int rowCount = 0;
 
-    // iterates through the result set and output them to standard out.
-    boolean outputHeader = true;
-    while (rs.next()) {
-        if(outputHeader) {
-            for(int i = 1; i <= numCol; i++) {
-                System.out.print(rsmd.getColumnName(i) + "\t");
+        // iterates through the result set and output them to standard out.
+        boolean outputHeader = true;
+        while (rs.next()) {
+            if(outputHeader) {
+                for(int i = 1; i <= numCol; i++) {
+                    System.out.print(rsmd.getColumnName(i) + "\t");
+                }
+                System.out.println();
+                outputHeader = false;
             }
-            System.out.println();
-            outputHeader = false;
-        }
-        for (int i=1; i<=numCol; ++i)
-            System.out.print (rs.getString (i) + "\t");
-        System.out.println ();
-        ++rowCount;
-    }//end while
-    stmt.close ();
-    return rowCount;
+            for (int i=1; i<=numCol; ++i)
+                System.out.print (rs.getString (i) + "\t");
+            System.out.println ();
+            ++rowCount;
+        }//end while
+
+        stmt.close ();
+        return rowCount;
     }//end executeQuery
 
     /**
@@ -138,34 +139,36 @@ public class ProfNetwork {
     * @throws java.sql.SQLException when failed to execute the query
     */
     public List<List<String>> executeQueryAndReturnResult (String query) throws SQLException {
-    // creates a statement object
+        // creates a statement object
         Statement stmt = this._connection.createStatement ();
 
-    // issues the query instruction
+        // issues the query instruction
         ResultSet rs = stmt.executeQuery (query);
 
-    /*
-    ** obtains the metadata object for the returned result set.  The metadata
-    ** contains row and column info.
-    */
-    ResultSetMetaData rsmd = rs.getMetaData ();
-    int numCol = rsmd.getColumnCount ();
-    int rowCount = 0;
+        /*
+        ** obtains the metadata object for the returned result set.  The metadata
+        ** contains row and column info.
+        */
+        ResultSetMetaData rsmd = rs.getMetaData ();
+        int numCol = rsmd.getColumnCount ();
+        int rowCount = 0;
 
-    // iterates through the result set and saves the data returned by the query.
-    boolean outputHeader = false;
-    List<List<String>> result  = new ArrayList<List<String>>();
-    while (rs.next()) {
-        List<String> record = new ArrayList<String>();
-        for (int i=1; i<=numCol; ++i)
-        {
-            record.add(rs.getString (i));
-            System.out.println(rs.getString(i));
-        }
-        result.add(record);
-    }//end while
-    stmt.close ();
-    return result;
+        // iterates through the result set and saves the data returned by the query.
+        boolean outputHeader = false;
+        List<List<String>> result  = new ArrayList<List<String>>();
+
+        while (rs.next()) {
+            List<String> record = new ArrayList<String>();
+            for (int i=1; i<=numCol; ++i)
+            {
+                record.add(rs.getString (i));
+                // System.out.println(rs.getString(i));
+            }
+            result.add(record);
+        }//end while
+
+        stmt.close ();
+        return result;
     }//end executeQueryAndReturnResult
 
     /**
@@ -277,8 +280,9 @@ public class ProfNetwork {
                         System.out.println("4. Send Friend Request");
                         System.out.println(".........................");
                         System.out.println("9. Log out");
+                        System.out.println(".........................");
                         switch (readChoice()) {
-                            case 1: FriendList(esql); break;
+                            case 1: FriendList(esql, authorisedUser); break;
                             case 2: UpdateProfile(esql); break;
                             case 3: NewMessage(esql); break;
                             case 4: SendRequest(esql); break;
@@ -371,13 +375,26 @@ public class ProfNetwork {
 
             String query = String.format("SELECT * FROM USR WHERE userId = '%s' AND password = '%s'", login, password);
             int userNum = esql.executeQuery(query);
+            List<List<String>> rs = esql.executeQueryAndReturnResult(query);
 
-            if (userNum > 0)
-            {
-                System.out.println("WELCOME " + login + "\n\n");
+            // This will get the real name of the person logging in
+            String realName = null;
+            Iterator<List<String>> it = rs.iterator();
+            while (it.hasNext()) {
+                List<String> ls = it.next();
+                for (int i = 0; i < ls.size(); ++i) {
+                    if (i == 3) {
+                        realName = ls.get(i);
+                    }
+                }
+            }
+
+            if (userNum > 0) {
+                System.out.println("Welcome: "+login+" | "+realName+"\n\n");
                 return login;
             }
             return null;
+
         } catch(Exception e) {
             System.err.println (e.getMessage ());
             return null;
@@ -393,8 +410,21 @@ public class ProfNetwork {
     // ---------------------------------------------------------------------
     // self defined functions
     // ---------------------------------------------------------------------
-    public static void FriendList(ProfNetwork esql) {
-        System.out.println("you didn't do this yet");
+    public static void FriendList(ProfNetwork esql, String login) {
+        try {
+            System.out.println();
+            String query = String.format(
+                "SELECT CU.connectionId " +
+                "FROM USR U, CONNECTION_USR CU " +
+                "WHERE U.userId = '%s' AND U.userId = CU.userId AND " +
+                "CU.status = 'Accept'", login);
+            List<List<String>> s = esql.executeQueryAndReturnResult(query);
+
+            System.out.println();
+
+        } catch(Exception e) {
+            System.err.println (e.getMessage ());
+        }
     }
 
     public static void UpdateProfile(ProfNetwork esql) {
