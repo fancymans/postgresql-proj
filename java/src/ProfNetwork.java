@@ -34,6 +34,7 @@ public class ProfNetwork {
 
     // reference to physical database connection.
         private Connection _connection = null;
+     static String current_user = null;
 
     // handling the keyboard inputs through a BufferedReader
     // This variable can be global for convenience.
@@ -272,14 +273,14 @@ public class ProfNetwork {
                         System.out.println("MAIN MENU");
                         System.out.println("---------");
                         System.out.println("1. Goto Friend List");
-                        System.out.println("2. Update Profile");
+                        System.out.println("2. Update Password");
                         System.out.println("3. Write a new message");
                         System.out.println("4. Send Friend Request");
                         System.out.println(".........................");
                         System.out.println("9. Log out");
                         switch (readChoice()) {
                             case 1: FriendList(esql); break;
-                            case 2: UpdateProfile(esql); break;
+                            case 2: UpdatePassword(esql); break;
                             case 3: NewMessage(esql); break;
                             case 4: SendRequest(esql); break;
                             case 9: usermenu = false; break;
@@ -374,8 +375,14 @@ public class ProfNetwork {
 
             if (userNum > 0)
             {
+                current_user = login;
+                System.out.println("current user is " + current_user);
                 System.out.println("WELCOME " + login + "\n\n");
                 return login;
+            }
+            else
+            {
+                System.out.println("Username or Password is wrong.");
             }
             return null;
         } catch(Exception e) {
@@ -386,10 +393,6 @@ public class ProfNetwork {
 
 
 
-
-
-
-
     // ---------------------------------------------------------------------
     // self defined functions
     // ---------------------------------------------------------------------
@@ -397,8 +400,23 @@ public class ProfNetwork {
         System.out.println("you didn't do this yet");
     }
 
-    public static void UpdateProfile(ProfNetwork esql) {
-        System.out.println("you didn't do this yet");
+    public static void UpdatePassword(ProfNetwork esql){
+        try{
+            System.out.print("\tEnter your new password: ");
+            String newpw = in.readLine();
+            System.out.print("\tEnter new password again: ");
+            String newpw2 = in.readLine();
+            if(newpw.equals(newpw2)){
+                String query = String.format("UPDATE USR SET password = '%s' WHERE userId = '%s'", newpw, current_user);
+                int userNum = esql.executeQuery(query);
+            }
+            else
+                System.out.println("New password did not match");
+        }
+        catch(Exception e)
+        {
+            System.out.println("UPDATED PASSWORD SUCCESSFUL"); 
+        }
     }
 
     public static void NewMessage(ProfNetwork esql) {
