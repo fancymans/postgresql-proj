@@ -255,7 +255,7 @@ public class ProfNetwork {
             boolean keepon = true;
             while(keepon) {
         // These are sample SQL statements
-                System.out.println("MAIN MENU");
+                System.out.println("\n\nMAIN MENU");
                 System.out.println("---------");
                 System.out.println("1. Create user");
                 System.out.println("2. Log in");
@@ -270,12 +270,13 @@ public class ProfNetwork {
                 if (authorisedUser != null) {
                     boolean usermenu = true;
                     while(usermenu) {
-                        System.out.println("MAIN MENU");
+                        System.out.println("\n\nMAIN MENU");
                         System.out.println("---------");
                         System.out.println("1. Goto Friend List");
                         System.out.println("2. Update Password");
                         System.out.println("3. Write a new message");
                         System.out.println("4. Send Friend Request");
+						System.out.println("5. Search for someone");
                         System.out.println(".........................");
                         System.out.println("9. Log out");
                         switch (readChoice()) {
@@ -283,7 +284,8 @@ public class ProfNetwork {
                             case 2: UpdatePassword(esql); break;
                             case 3: NewMessage(esql); break;
                             case 4: SendRequest(esql); break;
-                            case 9: usermenu = false; break;
+                            case 5: Search(esql);break;
+							case 9: usermenu = false; break;
                             default : System.out.println("Unrecognized choice!"); break;
                         }
                     }
@@ -409,7 +411,7 @@ public class ProfNetwork {
             if(newpw.equals(newpw2)){
                 String query = String.format("UPDATE USR SET password = '%s' WHERE userId = '%s'", newpw, current_user);
                 esql.executeQuery(query);
-                break;
+                
             }
             else
                 System.out.println("New password did not match\n");
@@ -427,6 +429,53 @@ public class ProfNetwork {
     public static void SendRequest(ProfNetwork esql) {
         System.out.println("you didn't do this yet");
     }
+	
+	public static void Search(ProfNetwork esql) {
+		try{
+            boolean flag = true;
+            String input = null;
+            while(flag)
+            {
+                System.out.print("\n\nWhat do you want to search by: \n");
+        		System.out.println("1. userId");
+        		System.out.println("2. email");
+        		System.out.println("3. name");
+        		System.out.println("4. dateOfBirth");
+                System.out.println("9. return to main menu");
+                System.out.print("Please make your choice: ");
+        		input = in.readLine();
+                if(input.equals("1") || input.equals("2") || input.equals("3") || input.equals("4") || input.equals("9"))
+                    flag = false;   
+                else
+                    System.out.println("ERROR: Please enter 1, 2, 3, 4, or 9. Try again\n"); 
+            }
+            if(!input.equals("9"))
+            {
+                System.out.print("Enter search criteria: ");
+                String criteria = in.readLine();
+        		String search_by = null;
+        		if(input.equals("1"))
+                    search_by = "userId";
+                else if(input.equals("2"))
+                    search_by = "email";
+                else if(input.equals("3"))
+                    search_by = "name";
+                else if(input.equals("4"))
+                    search_by = "dateOfBirth";
+            
+                String query = String.format("SELECT R.userId, R.email, R.name, R.dateOfBirth FROM USR R WHERE R.%s = '%s' ", search_by, criteria);
+                int i = esql.executeQueryAndPrintResult(query);
+                System.out.println("");
+                if(i < 0)
+                {
+                    System.out.println("ERROR IN SEARCH");
+                }
+            }
+        }
+        catch(Exception e){
+            System.out.println("caught exception in search");
+        }
+	}
 
 
 
