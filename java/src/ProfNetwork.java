@@ -281,6 +281,7 @@ public class ProfNetwork {
                         System.out.println("3. Write a new message");
                         System.out.println("4. Send Friend Request");
 						System.out.println("5. Search for someone");
+                        System.out.println("6. View Messages");
                         //System.out.println("6. Check if user exsits");
                         System.out.println(".........................");
                         System.out.println("9. Log out");
@@ -291,7 +292,7 @@ public class ProfNetwork {
                             case 3: NewMessage(esql); break;
                             case 4: SendRequest(esql, authorisedUser); break;
                             case 5: Search(esql);break;
-                            //case 6: userExistsAndPrint(esql);break;
+                            case 6: ViewMessages(esql);break;
 							case 9: usermenu = false; break;
                             default : System.out.println("Unrecognized choice!"); break;
                         }
@@ -479,6 +480,25 @@ public class ProfNetwork {
         {
             // !!!!!! insert command so do executeUpdate NOT executeQuery
             System.err.println (e.getMessage ());
+        }
+    }
+
+    public static void ViewMessages(ProfNetwork esql){
+        try{
+            String query = String.format("SELECT R.msgId, R.senderId, R.contents, R.sendTime FROM MESSAGE R WHERE R.receiverId = '%s' ", current_user);
+            int i = esql.executeQueryAndPrintResult(query);
+            System.out.println("");
+            if(i < 0)
+            {
+                System.out.println("ERROR IN ViewMessages()");
+            }
+            List<List<String>> result = esql.executeQueryAndReturnResult(query);
+            if(result.isEmpty())
+            {
+                System.out.println("\nYou have 0 Messages");
+            }
+        }catch(Exception e){
+            System.err.println(e.getMessage());
         }
     }
 
