@@ -281,7 +281,7 @@ public class ProfNetwork {
                         System.out.println("3. Write a new message");
                         System.out.println("4. Send Friend Request");
 						System.out.println("5. Search for someone");
-                        System.out.println("6. Check if user exsits");
+                        //System.out.println("6. Check if user exsits");
                         System.out.println(".........................");
                         System.out.println("9. Log out");
                         System.out.println("-------------------------");
@@ -291,7 +291,7 @@ public class ProfNetwork {
                             case 3: NewMessage(esql); break;
                             case 4: SendRequest(esql, authorisedUser); break;
                             case 5: Search(esql);break;
-                            case 6: userExistsAndPrint(esql);break;
+                            //case 6: userExistsAndPrint(esql);break;
 							case 9: usermenu = false; break;
                             default : System.out.println("Unrecognized choice!"); break;
                         }
@@ -318,7 +318,7 @@ public class ProfNetwork {
     public static void Greeting() {
         System.out.println(
             "\n\n*******************************************************\n" +
-                "                    User Interface                     \n" +
+                "                 Fancy User Interface                  \n" +
                 "*******************************************************\n");
     }//end Greeting
 
@@ -397,6 +397,7 @@ public class ProfNetwork {
 
             if (userNum > 0) {
                 System.out.println("Welcome: "+login+" | "+realName+"\n\n");
+                current_user = login;
                 return login;
             }
             else
@@ -455,7 +456,30 @@ public class ProfNetwork {
     }
 
     public static void NewMessage(ProfNetwork esql) {
-        System.out.println("you didn't do this yet");
+        try{
+            System.out.print("\t\tWho would you like to send a message to (enter userId): ");
+            String to = null;
+            to = in.readLine();
+            if(userExists(esql,to))
+            {   
+                String content = null;
+                System.out.print("\t\tWhat would you like to say: ");
+                content = in.readLine();
+                String time = "2011-10-09 21:49:41 -0700";
+                String status = "sent";
+                int ds = 0;
+                //String output1 = String.format("senderid =  " + current_user + "\nreceiverid =  " + to + "\nconetent =  " + content + "\nsendtime =  "+ time + "\ndeletestatus =  "+ ds +"\nstatus =  " + status);
+                //System.out.println(output1);
+                String query = String.format("INSERT INTO message(senderid,receiverid,contents,sendtime,deletestatus,status) VALUES ('%s','%s','%s','%s',%s,'%s')", current_user, to, content, time, ds, status);
+                esql.executeUpdate(query);
+                String output = String.format("\n\nSUCCESSFULLY SENT MESSAGE TO %s \n\n",to);
+                System.out.println(output);
+            }
+        }catch(Exception e)
+        {
+            // !!!!!! insert command so do executeUpdate NOT executeQuery
+            System.err.println (e.getMessage ());
+        }
     }
 
 
@@ -481,7 +505,7 @@ public class ProfNetwork {
             }
             if(!input.equals("9"))
             {
-                System.out.print("Enter search criteria: ");
+                System.out.print("\tEnter search criteria: ");
                 String criteria = in.readLine();
         		String search_by = null;
         		if(input.equals("1"))
@@ -500,20 +524,23 @@ public class ProfNetwork {
                 {
                     System.out.println("ERROR IN SEARCH");
                 }
+                List<List<String>> result = esql.executeQueryAndReturnResult(query);
+                if(result.isEmpty())
+                {
+                    System.out.println("\nNO RESULTS FOR THAT CRITERIA FOUND");
+                }
             }
         }
         catch(Exception e){
-            System.out.println("caught exception in search");
+            //System.err.println (e.getMessage ());
+            System.out.println("\tInvalid syntax entered.\n\tFor userId,email,or name, please enter a string\n\tFor dateOfBirth please enter in format MM/DD/YYYY\n");
         }
 	}
 
-    public static boolean userExistsAndPrint(ProfNetwork esql)
+    public static boolean userExistsAndPrint(ProfNetwork esql, String userid)
     {
         try{
-            System.out.print("\n\nEnter the userId you want to send a message to: ");
-            String to = null;
-            to = in.readLine();
-            String query = String.format("SELECT * FROM USR WHERE USR.userId='%s'", to);
+            String query = String.format("SELECT * FROM USR WHERE USR.userId='%s'", userid);
             List<List<String>> i = esql.executeQueryAndReturnResult(query);
             
             if(i.isEmpty())
@@ -537,28 +564,31 @@ public class ProfNetwork {
         return true;
     }
 
-
-    // public static void sendMessage()
-    // {
-    //     System.out.print("\n\nEnter the userId you want to send a message to: ");
-    //     String to = in.readLine();
-    //     if(userExists(to))
-    //     {
-    //         //send message
-    //     }
-    //     else
-    //     {
-    //         System.out.println("ERROR: message not sent because userId does not exist\n");
-    //     }
-    // }
-
+    public static boolean userExists(ProfNetwork esql, String userid)
+    {
+        try{
+            String query = String.format("SELECT * FROM USR WHERE USR.userId='%s'", userid);
+            List<List<String>> i = esql.executeQueryAndReturnResult(query);
+            
+            if(i.isEmpty())
+            {
+                System.out.println("ERROR NO USER FOUND");
+                return false;
+            }
+            return true;
+        }
+        catch(Exception e){
+            System.out.println("userExists() caught exception");
+        }
+        return true;
+    }
 
     public static void SendRequest(ProfNetwork esql, String currentUser) {
         try {
 
             // TODO: Check if the user exists...
 
-            System.out.print("Who would you like to send a request to?\n\t: ");
+            System.out.print("\tWho would you like to send a request to?\n\t: ");
             String userid = in.readLine(); System.out.println();
             String query = String.format(
                 "INSERT INTO CONNECTION_USR VALUES('%s','%s','Request')",

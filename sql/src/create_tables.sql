@@ -3,7 +3,7 @@ DROP TABLE EDUCATIONAL_DETAILS;
 DROP TABLE MESSAGE;
 DROP TABLE CONNECTION_USR;
 DROP TABLE USR;
-
+DROP SEQUENCE message_msgId_seq;
 
 CREATE TABLE USR(
 	userId varchar(50) UNIQUE NOT NULL,
@@ -31,8 +31,9 @@ CREATE TABLE EDUCATIONAL_DETAILS(
 	enddate date,
 	PRIMARY KEY(userId,major,degree));
 
+CREATE SEQUENCE message_msgId_seq start with 27812 increment by 1 minvalue 0;
 CREATE TABLE MESSAGE(
-	msgId integer UNIQUE NOT NULL,
+	msgId integer default nextval('message_msgId_seq')UNIQUE NOT NULL,
 	senderId char(50) NOT NULL,
 	receiverId char(50) NOT NULL,
 	contents char(500) NOT NULL,
