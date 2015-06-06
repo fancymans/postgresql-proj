@@ -291,7 +291,7 @@ public class ProfNetwork {
                             case 3: NewMessage(esql); break;
                             case 4: SendRequest(esql, authorisedUser); break;
                             case 5: Search(esql);break;
-                            case 6: userExists(esql);break;
+                            case 6: userExistsAndPrint(esql);break;
 							case 9: usermenu = false; break;
                             default : System.out.println("Unrecognized choice!"); break;
                         }
