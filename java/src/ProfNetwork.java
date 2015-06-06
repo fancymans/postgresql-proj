@@ -415,8 +415,22 @@ public class ProfNetwork {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // ---------------------------------------------------------------------
-    // self defined functions
+    // list out user's friends
     // ---------------------------------------------------------------------
     public static void FriendList(ProfNetwork esql) {
         try {
@@ -436,7 +450,9 @@ public class ProfNetwork {
     }
 
 
-
+    // ---------------------------------------------------------------------
+    // update user's password
+    // ---------------------------------------------------------------------
     public static void UpdatePassword(ProfNetwork esql){
         try {
             System.out.print("\tEnter your new password: ");
@@ -456,13 +472,17 @@ public class ProfNetwork {
         }
     }
 
+
+    // ---------------------------------------------------------------------
+    // compose and send new message
+    // ---------------------------------------------------------------------
     public static void NewMessage(ProfNetwork esql) {
         try{
             System.out.print("\t\tWho would you like to send a message to (enter userId): ");
             String to = null;
             to = in.readLine();
             if(userExists(esql,to))
-            {   
+            {
                 String content = null;
                 System.out.print("\t\tWhat would you like to say: ");
                 content = in.readLine();
@@ -483,6 +503,10 @@ public class ProfNetwork {
         }
     }
 
+
+    // ---------------------------------------------------------------------
+    // read messages
+    // ---------------------------------------------------------------------
     public static void ViewMessages(ProfNetwork esql){
         try{
             String query = String.format("SELECT R.msgId, R.senderId, R.contents, R.sendTime FROM MESSAGE R WHERE R.receiverId = '%s' ", current_user);
@@ -503,7 +527,9 @@ public class ProfNetwork {
     }
 
 
-
+    // ---------------------------------------------------------------------
+    // search by input
+    // ---------------------------------------------------------------------
 	public static void Search(ProfNetwork esql) {
 		try{
             boolean flag = true;
@@ -557,12 +583,16 @@ public class ProfNetwork {
         }
 	}
 
+
+    // ---------------------------------------------------------------------
+    // check if user exists and print
+    // ---------------------------------------------------------------------
     public static boolean userExistsAndPrint(ProfNetwork esql, String userid)
     {
         try{
             String query = String.format("SELECT * FROM USR WHERE USR.userid='%s'", userid);
             List<List<String>> i = esql.executeQueryAndReturnResult(query);
-            
+
             if(i.isEmpty())
             {
                 System.out.println("ERROR NO USER FOUND");
@@ -584,12 +614,16 @@ public class ProfNetwork {
         return true;
     }
 
+
+    // ---------------------------------------------------------------------
+    // check if a user exists
+    // ---------------------------------------------------------------------
     public static boolean userExists(ProfNetwork esql, String userid)
     {
         try{
             String query = String.format("SELECT * FROM USR WHERE USR.userId='%s'", userid);
             List<List<String>> i = esql.executeQueryAndReturnResult(query);
-            
+
             if(i.isEmpty())
             {
                 System.out.println("ERROR NO USER FOUND");
@@ -603,20 +637,30 @@ public class ProfNetwork {
         return true;
     }
 
+
+    // ---------------------------------------------------------------------
+    // send friend request
+    // ---------------------------------------------------------------------
     public static void SendRequest(ProfNetwork esql, String currentUser) {
         try {
+            // Ask who to send a request to
+            System.out.print("Who would you like to send a request to: ");
+            String userid = in.readLine();
+            System.out.println();
 
-            // TODO: Check if the user exists...
-            // ^ i made a funciton for that see userExists(esql,userid) or userExistsAndPrint(esql,userid)
-
-            System.out.print("\tWho would you like to send a request to?\n\t: ");
-            String userid = in.readLine(); System.out.println();
-            String query = String.format(
+            // Check if that person exists
+            if (userExists(esql, userid)) {
+                String query = String.format(
                 "INSERT INTO CONNECTION_USR VALUES('%s','%s','Request')",
                 currentUser, userid);
-            // System.out.println(query);
-            esql.executeUpdate(query);
-            System.out.println("Request sent.\n");
+                esql.executeUpdate(query);
+                System.out.println("Request to: \"" + userid + "\" sent.\n");
+            }
+            else {
+                System.out.println(
+                    "Your request could not be sent.\n" +
+                    "The user: \"" + userid + "\" does not exist.\n");
+            }
         }
         catch(Exception e) {
             System.err.println(e.getMessage() + "\n");
