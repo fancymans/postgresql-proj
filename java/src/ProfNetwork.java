@@ -587,6 +587,7 @@ public class ProfNetwork {
         try {
 
             // TODO: Check if the user exists...
+            // ^ i made a funciton for that see userExists(esql,userid) or userExistsAndPrint(esql,userid)
 
             System.out.print("\tWho would you like to send a request to?\n\t: ");
             String userid = in.readLine(); System.out.println();
