@@ -33,7 +33,7 @@ import java.util.Iterator;
 public class ProfNetwork {
 
     // reference to physical database connection.
-        private Connection _connection = null;
+     private Connection _connection = null;
      static String current_user = null;
 
     // handling the keyboard inputs through a BufferedReader
@@ -279,14 +279,14 @@ public class ProfNetwork {
                         System.out.println("2. Update Password");
                         System.out.println("3. Write a new message");
                         System.out.println("4. Send Friend Request");
-                        System.out.println(".........................");
+                        System.out.println("-------------------------");
                         System.out.println("9. Log out");
-                        System.out.println(".........................");
+                        System.out.println("-------------------------");
                         switch (readChoice()) {
-                            case 1: FriendList(esql, authorisedUser); break;
+                            case 1: FriendList(esql); break;
                             case 2: UpdatePassword(esql); break;
                             case 3: NewMessage(esql); break;
-                            case 4: SendRequest(esql); break;
+                            case 4: SendRequest(esql, authorisedUser); break;
                             case 9: usermenu = false; break;
                             default : System.out.println("Unrecognized choice!"); break;
                         }
@@ -313,8 +313,8 @@ public class ProfNetwork {
     public static void Greeting() {
         System.out.println(
             "\n\n*******************************************************\n" +
-            "              User Interface                         \n" +
-            "*******************************************************\n");
+                "                    User Interface                     \n" +
+                "*******************************************************\n");
     }//end Greeting
 
     /*
@@ -411,25 +411,25 @@ public class ProfNetwork {
     // ---------------------------------------------------------------------
     // self defined functions
     // ---------------------------------------------------------------------
-    public static void FriendList(ProfNetwork esql, String login) {
+    public static void FriendList(ProfNetwork esql) {
         try {
             System.out.println();
             String query = String.format(
                 "SELECT CU.connectionId " +
                 "FROM USR U, CONNECTION_USR CU " +
                 "WHERE U.userId = '%s' AND U.userId = CU.userId AND " +
-                "CU.status = 'Accept'", login);
+                "CU.status = 'Accept'", current_user);
             List<List<String>> s = esql.executeQueryAndReturnResult(query);
 
             System.out.println();
 
         } catch(Exception e) {
-            System.err.println (e.getMessage ());
+            System.err.println(e.getMessage() + "\n");
         }
     }
 
     public static void UpdatePassword(ProfNetwork esql){
-        try{
+        try {
             System.out.print("\tEnter your new password: ");
             String newpw = in.readLine();
             System.out.print("\tEnter new password again: ");
@@ -439,11 +439,11 @@ public class ProfNetwork {
                 esql.executeQuery(query);
             }
             else
-                System.out.println("New password did not match\n");
+                System.err.println("New password did not match\n");
         }
         catch(Exception e)
         {
-            System.out.println("UPDATED PASSWORD SUCCESSFUL\n");
+            System.err.println("UPDATED PASSWORD SUCCESSFUL\n");
         }
     }
 
@@ -451,10 +451,24 @@ public class ProfNetwork {
         System.out.println("you didn't do this yet");
     }
 
-    public static void SendRequest(ProfNetwork esql) {
-        System.out.println("you didn't do this yet");
-    }
+    public static void SendRequest(ProfNetwork esql, String currentUser) {
+        try {
 
+            // TODO: Check if the user exists...
+
+            System.out.print("Who would you like to send a request to?\n\t: ");
+            String userid = in.readLine(); System.out.println();
+            String query = String.format(
+                "INSERT INTO CONNECTION_USR VALUES('%s','%s','Request')",
+                currentUser, userid);
+            // System.out.println(query);
+            esql.executeUpdate(query);
+            System.out.println("Request sent.\n");
+        }
+        catch(Exception e) {
+            System.err.println(e.getMessage() + "\n");
+        }
+    }
 
 
 
