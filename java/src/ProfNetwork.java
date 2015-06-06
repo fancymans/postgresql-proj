@@ -560,7 +560,7 @@ public class ProfNetwork {
     public static boolean userExistsAndPrint(ProfNetwork esql, String userid)
     {
         try{
-            String query = String.format("SELECT * FROM USR WHERE USR.userId='%s'", userid);
+            String query = String.format("SELECT * FROM USR WHERE USR.userid='%s'", userid);
             List<List<String>> i = esql.executeQueryAndReturnResult(query);
             
             if(i.isEmpty())
@@ -568,7 +568,7 @@ public class ProfNetwork {
                 System.out.println("ERROR NO USER FOUND");
                 return false;
             }
-            for(int j = 0; j < i.size(); j++)
+            for(int j = 0; j < i.size()-1; j++)
             {
                 Iterator<List<String>> iterator = i.iterator();
                 while(iterator.hasNext())
