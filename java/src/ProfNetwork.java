@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Arrays;
 
 /**
 * This class defines a simple embedded SQL utility class that is designed to
@@ -280,6 +281,7 @@ public class ProfNetwork {
                         System.out.println("3. Write a new message");
                         System.out.println("4. Send Friend Request");
 						System.out.println("5. Search for someone");
+                        System.out.println("6. Check if user exsits");
                         System.out.println(".........................");
                         System.out.println("9. Log out");
                         System.out.println(".........................");
@@ -289,6 +291,7 @@ public class ProfNetwork {
                             case 3: NewMessage(esql); break;
                             case 4: SendRequest(esql); break;
                             case 5: Search(esql);break;
+                            case 6: userExists(esql);break;
 							case 9: usermenu = false; break;
                             default : System.out.println("Unrecognized choice!"); break;
                         }
@@ -504,6 +507,50 @@ public class ProfNetwork {
         }
 	}
 
+    public static boolean userExistsAndPrint(ProfNetwork esql)
+    {
+        try{
+            System.out.print("\n\nEnter the userId you want to send a message to: ");
+            String to = null;
+            to = in.readLine();
+            String query = String.format("SELECT * FROM USR WHERE USR.userId='%s'", to);
+            List<List<String>> i = esql.executeQueryAndReturnResult(query);
+            
+            if(i.isEmpty())
+            {
+                System.out.println("ERROR NO USER FOUND");
+                return false;
+            }
+            for(int j = 0; j < i.size(); j++)
+            {
+                Iterator<List<String>> iterator = i.iterator();
+                while(iterator.hasNext())
+                {
+                    System.out.printf("Current element in list is %s %n", iterator.next());
+                }
+            }
+            return true;
+        }
+        catch(Exception e){
+            System.out.println("userExists() caught exception");
+        }
+        return true;
+    }
+
+
+    // public static void sendMessage()
+    // {
+    //     System.out.print("\n\nEnter the userId you want to send a message to: ");
+    //     String to = in.readLine();
+    //     if(userExists(to))
+    //     {
+    //         //send message
+    //     }
+    //     else
+    //     {
+    //         System.out.println("ERROR: message not sent because userId does not exist\n");
+    //     }
+    // }
 
 
 
