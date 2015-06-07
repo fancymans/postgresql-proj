@@ -294,7 +294,7 @@ public class ProfNetwork {
                         System.out.println("0. Log out");
                         System.out.println("-------------------------");
                         switch (readChoice()) {
-                            case 1: FriendList(esql); break;
+                            case 1: FriendList(esql, authorisedUser); break;
                             case 2: UpdatePassword(esql); break;
                             case 3: NewMessage(esql); break;
                             case 4: SendRequest(esql, authorisedUser); break;
@@ -423,50 +423,174 @@ public class ProfNetwork {
         }
     }//end
 
+    public static void NewMessage(ProfNetwork esql, String to) {
+        try{
+            if(userExists(esql,to))
+            {
+                String content = null;
+                System.out.print("\t\tWhat would you like to say: ");
+                content = in.readLine();
+                Timestamp ts = new Timestamp(System.currentTimeMillis());
+                String status = "sent";
+                int ds = 0;
+                //String output1 = String.format("senderid =  " + current_user + "\nreceiverid =  " + to + "\nconetent =  " + content + "\nsendtime =  "+ time + "\ndeletestatus =  "+ ds +"\nstatus =  " + status);
+                //System.out.println(output1);
+                String query = String.format("INSERT INTO message(senderid,receiverid,contents,sendtime,deletestatus,status) VALUES ('%s','%s','%s','%s',%s,'%s')", current_user, to, content, ts, ds, status);
+                esql.executeUpdate(query);
+                String output = String.format("\n\nSUCCESSFULLY SENT MESSAGE TO %s \n\n",to);
+                System.out.println(output);
+            }
+        }catch(Exception e)
+        {
+            // !!!!!! insert command so do executeUpdate NOT executeQuery
+            System.err.println (e.getMessage ());
+        }
+    }
 
+    public static String GetName(ProfNetwork esql, String userid) {
+        try {
+            String query = String.format(
+                "SELECT U.name " +
+                "FROM USR U " +
+                "WHERE U.userId = '%s'",
+                userid);
+            List<List<String>> rs = esql.executeQueryAndReturnResult(query);
 
+            for (List<String> ls : rs) {
+                for (String s : ls) {
+                    return s;
+                }
+            }
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+        return null;
+    }
 
+    public static String GetEmail(ProfNetwork esql, String userid) {
+        try {
+            String query = String.format(
+                "SELECT U.email " +
+                "FROM USR U " +
+                "WHERE U.userId = '%s'",
+                userid);
+            List<List<String>> rs = esql.executeQueryAndReturnResult(query);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            for (List<String> ls : rs) {
+                for (String s : ls) {
+                    return s;
+                }
+            }
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+        return null;
+    }
 
 
     // ---------------------------------------------------------------------
     // list out user's friends
     // ---------------------------------------------------------------------
-    public static void FriendList(ProfNetwork esql) {
+    public static void Go2Profile(ProfNetwork esql, List<List<String>> rs) {
+        try {
+
+            System.out.println();
+            System.out.print("\tWhose profile would you like to view: ");
+            String userid = in.readLine();
+            System.out.println();
+
+            boolean isValid = false;
+            for (List<String> ls : rs) {
+                for (String s : ls) {
+                    if (userid.equals(s)) {
+                        isValid = true;
+                    }
+                }
+            }
+
+            if (isValid) {
+                // show them profile menu
+
+                String n = GetName(esql, userid);
+                String e = GetEmail(esql, userid);
+
+                System.out.println("\t" + userid + "'s Profile");
+                System.out.println("\tName:\t" + n);
+                System.out.println("\tEmail:\t" + e);
+                System.out.println();
+                System.out.println("\tWhat would you like to do: ");
+                System.out.println("\t1. View " + userid + "'s friends");
+                System.out.println("\t2. Send a message to " + userid);
+                System.out.print("\t");
+
+                switch (readChoice()) {
+                    case 1:
+                        FriendList(esql, userid);
+                        break;
+
+                    case 2:
+                        NewMessage(esql, userid);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else {
+                System.out.println(
+                    "\tNone of the friends match the name \"" + userid +
+                    "\". Please try again.\n");
+                return;
+            }
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+
+    // ---------------------------------------------------------------------
+    // list out user's friends
+    // ---------------------------------------------------------------------
+    public static void FriendList(ProfNetwork esql, String currentUser) {
         try {
             System.out.println();
             String query = String.format(
                 "SELECT CU.connectionId " +
                 "FROM USR U, CONNECTION_USR CU " +
                 "WHERE U.userId = '%s' AND U.userId = CU.userId AND " +
-                "CU.status = 'Accept'", current_user);
+                "CU.status = 'Accept'", currentUser);
+            List<List<String>> rs = esql.executeQueryAndReturnResult(query);
             int q = esql.executeQueryAndPrintResult(query);
+
+            if (rs.size() == 0) {
+                System.out.println(currentUser + " has no friends. QQ. :'(");
+                System.out.println("Returning to main menu\n");
+                return;
+            }
+
             System.out.println();
+            System.out.println("\tWould you like to view a friend's profile?");
+            System.out.println("\t1. Yes");
+            System.out.println("\t2. No, return to main menu");
+            System.out.print("\t");
+
+            switch (readChoice()) {
+                case 1:
+                    Go2Profile(esql, rs);
+                    break;
+
+                case 2:
+                    return;
+
+                default :
+                    System.out.println("Unrecognized choice!");
+                    break;
+            }
+
+
         } catch(Exception e) {
             System.err.println(e.getMessage() + "\n");
         }
@@ -874,7 +998,6 @@ public class ProfNetwork {
 
                             for (List<String> ls2 : rs2) {
                                 for(String s2 : ls2) {
-                                    s2.trim();
                                     if (userid.equals(s2)) {
                                         isWithinScope = true;
                                         break;
@@ -891,7 +1014,6 @@ public class ProfNetwork {
 
                                         for (List<String> ls3 : rs3) {
                                             for (String s3 : ls3) {
-                                                System.out.println(s3);
                                                 if (userid.equals(s3)) {
                                                     isWithinScope = true;
                                                     break;
@@ -907,9 +1029,9 @@ public class ProfNetwork {
 
                 if (isWithinScope) {
                     query = String.format(
-                    "INSERT INTO CONNECTION_USR " +
-                    "VALUES('%s','%s','Request')",
-                    currentUser, userid);
+                        "INSERT INTO CONNECTION_USR " +
+                        "VALUES('%s','%s','Request')",
+                        currentUser, userid);
 
                     esql.executeUpdate(query);
 
@@ -1052,32 +1174,4 @@ public class ProfNetwork {
             System.err.println(e.getMessage() + "\n");
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }//end ProfNetwork
