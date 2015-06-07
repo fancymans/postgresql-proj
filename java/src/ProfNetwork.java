@@ -266,12 +266,12 @@ public class ProfNetwork {
                 System.out.println("---------");
                 System.out.println("1. Create user");
                 System.out.println("2. Log in");
-                System.out.println("9. < EXIT");
+                System.out.println("0. < EXIT");
                 String authorisedUser = null;
                 switch (readChoice()) {
                     case 1: CreateUser(esql); break;
                     case 2: authorisedUser = LogIn(esql); break;
-                    case 9: keepon = false; break;
+                    case 0: keepon = false; break;
                     default : System.out.println("Unrecognized choice!"); break;
                 }//end switch
                 if (authorisedUser != null) {
@@ -283,23 +283,25 @@ public class ProfNetwork {
                         System.out.println("2. Update Password");
                         System.out.println("3. Write a new message");
                         System.out.println("4. Send Friend Request");
-						System.out.println("5. Search for someone");
-                        System.out.println("6. View Messages");
-                        System.out.println("7. Check status of sent messages");
-                        System.out.println("8. Delete message");
+                        System.out.println("5. Check Friend Requests");
+						System.out.println("6. Search for someone");
+                        System.out.println("7. View Messages");
+                        System.out.println("8. Check status of sent messages");
+                        System.out.println("9. Delete message");
                         System.out.println("-------------------------");
-                        System.out.println("9. Log out");
+                        System.out.println("0. Log out");
                         System.out.println("-------------------------");
                         switch (readChoice()) {
                             case 1: FriendList(esql); break;
                             case 2: UpdatePassword(esql); break;
                             case 3: NewMessage(esql); break;
                             case 4: SendRequest(esql, authorisedUser); break;
-                            case 5: Search(esql);break;
-                            case 6: ViewMessages(esql);break;
-                            case 7: StatusOfSentMessages(esql); break;
-                            case 8: DeleteMessage(esql); break;
-							case 9: usermenu = false; break;
+                            case 5: CheckRequests(esql, authorisedUser); break;
+                            case 6: Search(esql); break;
+                            case 7: ViewMessages(esql);break;
+                            case 8: StatusOfSentMessages(esql); break;
+                            case 9: DeleteMessage(esql); break;
+							case 0: usermenu = false; break;
                             default : System.out.println("Unrecognized choice!"); break;
                         }
                     }
@@ -418,6 +420,36 @@ public class ProfNetwork {
             return null;
         }
     }//end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // ---------------------------------------------------------------------
@@ -578,15 +610,15 @@ public class ProfNetwork {
         		System.out.println("2. email");
         		System.out.println("3. name");
         		System.out.println("4. dateOfBirth");
-                System.out.println("9. return to main menu");
+                System.out.println("0. return to main menu");
                 System.out.print("Please make your choice: ");
         		input = in.readLine();
-                if(input.equals("1") || input.equals("2") || input.equals("3") || input.equals("4") || input.equals("9"))
+                if(input.equals("1") || input.equals("2") || input.equals("3") || input.equals("4") || input.equals("0"))
                     flag = false;
                 else
                     System.out.println("ERROR: Please enter 1, 2, 3, 4, or 9. Try again\n");
             }
-            if(!input.equals("9"))
+            if(!input.equals("0"))
             {
                 System.out.print("\tEnter search criteria: ");
                 String criteria = in.readLine();
@@ -891,35 +923,130 @@ public class ProfNetwork {
         }
     }
 
+    public static void UpdateConnection(ProfNetwork esql, String query) {
+        try {
+            esql.executeUpdate(query);
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage() + "\n");
+        }
+    }
 
+    public static void Respond2Connection(ProfNetwork esql, String currentUser) {
+        try {
+            while (true) {
+                System.out.print("\n\t\tWhich user would you like to respond to: ");
+                String userid = in.readLine();
+                System.out.println();
 
+                String query = String.format(
+                    "SELECT EXISTS( " +
+                        "SELECT * FROM CONNECTION_USR C WHERE C.userId = '%s' " +
+                        "AND C.connectionId = '%s' AND C.status = 'Request')",
+                    userid, currentUser);
 
+                List<List<String>> rs = esql.executeQueryAndReturnResult(query);
 
+                for (List<String> ls : rs) {
+                    for (String s : ls) {
+                        if (s.equals("t")) {
+                            System.out.println("\t\tYou have a friend request from \"" + userid + "\"");
+                            System.out.println("\t\tWould you like to accept or reject this request?");
+                            System.out.println("\t\t1. Accept");
+                            System.out.println("\t\t2. Reject");
+                            System.out.println("\t\t3. Choose different request");
+                            System.out.println("\t\t0. Go to previous menu");
 
+                            switch (readChoice()) {
+                                case 1:
+                                    query = String.format(
+                                        "UPDATE CONNECTION_USR " +
+                                        "SET status = 'Accept'" +
+                                        "WHERE userId = '%s' " +
+                                        "AND connectionId = '%s'",
+                                        userid, currentUser);
+                                    UpdateConnection(esql, query);
+                                    return;
 
+                                case 2:
+                                    query = String.format(
+                                        "UPDATE CONNECTION_USR " +
+                                        "SET status = 'Reject'" +
+                                        "WHERE userId = '%s' " +
+                                        "AND connectionId = '%s'",
+                                        userid, currentUser);
+                                    UpdateConnection(esql, query);
+                                    return;
 
+                                case 3:
+                                    break;
 
+                                case 0:
+                                    return;
 
+                                default :
+                                    System.out.println("Unrecognized choice!");
+                                    break;
+                            }
+                        }
+                        else {
+                            System.out.println("There is no request from \"" + userid + "\"");
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage() + "\n");
+        }
+    }
 
+    public static void CheckRequests(ProfNetwork esql, String currentUser) {
+        try {
+            while (true) {
+                String query = String.format(
+                    "SELECT C.userId " +
+                    "FROM CONNECTION_USR C " +
+                    "WHERE C.connectionId = '%s' " +
+                    "AND C.status = 'Request'", currentUser);
 
+                System.out.println();
+                List<List<String>> rs = esql.executeQueryAndReturnResult(query);
+                if (rs.size() == 0) {
+                    System.out.println(
+                        "You have no pending requests.\n" +
+                        "Returning to main menu.\n");
+                    return;
+                }
 
+                System.out.println("Pending requests: ");
+                int q = esql.executeQueryAndPrintResult(query);
+                System.out.println();
 
+                System.out.println("\tDo you want to respond to a request?");
+                System.out.println("\t1. Yes");
+                System.out.println("\t2. No, return to main menu");
+                System.out.print("\t");
 
+                switch (readChoice()) {
+                    case 1:
+                        Respond2Connection(esql, currentUser);
+                        break;
 
+                    case 2:
+                        return;
 
-
-
-
-
-
-
-
-
-
-
-
-
-    // Rest of the functions definition go in here
+                    default :
+                        System.out.println("Unrecognized choice!");
+                        break;
+                }
+            }
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage() + "\n");
+        }
+    }
 
 
 
