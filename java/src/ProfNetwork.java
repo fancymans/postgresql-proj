@@ -440,10 +440,8 @@ public class ProfNetwork {
                 "FROM USR U, CONNECTION_USR CU " +
                 "WHERE U.userId = '%s' AND U.userId = CU.userId AND " +
                 "CU.status = 'Accept'", current_user);
-            List<List<String>> s = esql.executeQueryAndReturnResult(query);
-
+            int q = esql.executeQueryAndPrintResult(query);
             System.out.println();
-
         } catch(Exception e) {
             System.err.println(e.getMessage() + "\n");
         }
@@ -637,12 +635,46 @@ public class ProfNetwork {
         return true;
     }
 
+    // ---------------------------------------------------------------------
+    // checks if a user is new or not
+    // new user: not having any connections -- aka a loner D:
+    // ---------------------------------------------------------------------
+    public static boolean isNewUser(ProfNetwork esql, String currentUser) {
+        try {
+            System.out.println();
+            String query = String.format(
+                "SELECT COUNT(*) " +
+                "FROM USR U, CONNECTION_USR CU " +
+                "WHERE U.userId = '%s' AND U.userId = CU.userId AND " +
+                "CU.status = 'Accept'", current_user);
+            List<List<String>> s = esql.executeQueryAndReturnResult(query);
+            System.out.println();
+
+        } catch(Exception e) {
+            System.err.println(e.getMessage() + "\n");
+        }
+        return false;
+    }
 
     // ---------------------------------------------------------------------
     // send friend request
     // ---------------------------------------------------------------------
     public static void SendRequest(ProfNetwork esql, String currentUser) {
         try {
+            // TODO: Check if user is a new user (defined by not having any connections -- aka a loner)
+            //      if new user allow only max of 5 new connections
+            //      else allow only requests to people who are within 3 levels of connextion.
+
+            // Check if user is a "new user"
+            if (isNewUser(esql, currentUser)) {
+                // is new
+
+            }
+            else {
+                // is not new
+
+            }
+
             // Ask who to send a request to
             System.out.print("Who would you like to send a request to: ");
             String userid = in.readLine();
