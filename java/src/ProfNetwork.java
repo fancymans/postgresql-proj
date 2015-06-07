@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Timestamp;
 
 /**
 * This class defines a simple embedded SQL utility class that is designed to
@@ -405,6 +407,8 @@ public class ProfNetwork {
             if (userNum > 0) {
                 System.out.println("Welcome: "+login+" | "+realName+"\n\n");
                 current_user = login;
+                Timestamp ts = new Timestamp(System.currentTimeMillis());
+                System.out.println(ts);
                 return login;
             }
             else
