@@ -1,12 +1,15 @@
 We require that you have the following defined in your bashrc or bash_profile
     PGDATA
     PGPORT
-    DB_NAME
+    DBNAME
+If you named them anything differently, you will have to update the compile.sh file to reflect that.
+
 
 We modified the sql files so please be sure to load it before running:
     psql -p $PGPORT $DB_NAME < ~/github/postgresql-proj/sql/src/create_tables.sql
     psql -p $PGPORT $DB_NAME < ~/github/postgresql-proj/sql/src/load_data.sql
 All CSV files are needed to run load_data correctly.
+
 
 To compile and run:
     ./java/scripts/compile.sh
