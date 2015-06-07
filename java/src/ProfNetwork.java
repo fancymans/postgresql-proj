@@ -283,7 +283,7 @@ public class ProfNetwork {
 						System.out.println("5. Search for someone");
                         System.out.println("6. View Messages");
                         //System.out.println("6. Check if user exsits");
-                        System.out.println(".........................");
+                        System.out.println("-------------------------");
                         System.out.println("9. Log out");
                         System.out.println("-------------------------");
                         switch (readChoice()) {
@@ -606,7 +606,7 @@ public class ProfNetwork {
             }
             return true;
         }
-        catch(Exception e){
+        catch (Exception e) {
             System.out.println("userExists() caught exception");
         }
         return true;
@@ -629,7 +629,7 @@ public class ProfNetwork {
             }
             return true;
         }
-        catch(Exception e){
+        catch (Exception e) {
             System.out.println("userExists() caught exception");
         }
         return true;
@@ -643,18 +643,54 @@ public class ProfNetwork {
         try {
             System.out.println();
             String query = String.format(
-                "SELECT COUNT(*) " +
+                "SELECT CU.connectionId " +
                 "FROM USR U, CONNECTION_USR CU " +
                 "WHERE U.userId = '%s' AND U.userId = CU.userId AND " +
                 "CU.status = 'Accept'", current_user);
-            List<List<String>> s = esql.executeQueryAndReturnResult(query);
-            System.out.println();
+            List<List<String>> rs = esql.executeQueryAndReturnResult(query);
 
-        } catch(Exception e) {
-            System.err.println(e.getMessage() + "\n");
+            // friend count
+            int fc = rs.size();
+
+            System.out.println("You currently have " + fc + " connections.");
+
+            if (fc > 0) {
+                System.out.println("Since you are not a new user, you are only able to request connections with those who are within 3 mutual connections to you.\n");
+                return false;
+            } else {
+                System.out.println("As such, you are entitled to request up to 5 new connections.\n");
+                return true;
+            }
         }
-        return false;
+        catch (Exception e) {
+            System.err.println(e.getMessage() + "\n");
+            return false;
+        }
     }
+
+
+    // ---------------------------------------------------------------------
+    // gets the number of connection requests sent by a user
+    // ---------------------------------------------------------------------
+    public static int numRequests(ProfNetwork esql, String currentUser) {
+        try {
+            String query = String.format(
+                "SELECT * FROM CONNECTION_USR C " +
+                "WHERE C.userId = '%s' AND C.status = 'Request'",
+                currentUser);
+
+            List<List<String>> rs = esql.executeQueryAndReturnResult(query);
+
+            // request count
+            int rc = rs.size();
+            return rc;
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage() + "\n");
+            return -1;
+        }
+    }
+
 
     // ---------------------------------------------------------------------
     // send friend request
@@ -665,36 +701,59 @@ public class ProfNetwork {
             //      if new user allow only max of 5 new connections
             //      else allow only requests to people who are within 3 levels of connextion.
 
+
             // Check if user is a "new user"
-            if (isNewUser(esql, currentUser)) {
-                // is new
-
-            }
-            else {
-                // is not new
-
-            }
+            boolean n = isNewUser(esql, currentUser);
 
             // Ask who to send a request to
             System.out.print("Who would you like to send a request to: ");
             String userid = in.readLine();
             System.out.println();
 
-            // Check if that person exists
-            if (userExists(esql, userid)) {
-                String query = String.format(
-                "INSERT INTO CONNECTION_USR VALUES('%s','%s','Request')",
-                currentUser, userid);
-                esql.executeUpdate(query);
-                System.out.println("Request to: \"" + userid + "\" sent.\n");
+            // if new user allow only max of 5 new connections
+            // else allow only requests to people who are within 3 levels of connextion.
+            if (n) {
+                // maximum request count
+                int maxrc = 5;
+
+                // Get request count
+                int rc = numRequests(esql, currentUser);
+
+                if (rc < maxrc) {
+                    // Check if that person exists
+                    if (userExists(esql, userid)) {
+                        String query = String.format(
+                            "INSERT INTO CONNECTION_USR " +
+                            "VALUES('%s','%s','Request')",
+                            currentUser, userid);
+
+                        esql.executeUpdate(query);
+                        rc++;
+
+                        System.out.println("Request to: \"" + userid + "\" sent.");
+                        System.out.println(
+                            "You have currently sent " + rc + " out of " +
+                            maxrc + " connection requests.\n");
+                    }
+                    else {
+                        System.out.println(
+                        "Your request could not be sent.\n" +
+                        "The user: \"" + userid + "\" does not exist.\n");
+                    }
+                }
+                else {
+                    System.err.println(
+                        "You have met or exceeded your available amount of " +
+                        "connection requests.\n" +
+                        "You may not request any more. " +
+                        "Please try again at a later time.\n");
+                }
             }
             else {
-                System.out.println(
-                    "Your request could not be sent.\n" +
-                    "The user: \"" + userid + "\" does not exist.\n");
+                // else allow only requests to people who are within 3 levels of connextion
             }
         }
-        catch(Exception e) {
+        catch (Exception e) {
             System.err.println(e.getMessage() + "\n");
         }
     }
