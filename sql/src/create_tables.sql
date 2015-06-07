@@ -9,24 +9,24 @@ CREATE TABLE USR(
 	userId varchar(50) UNIQUE NOT NULL,
 	password varchar(50) NOT NULL,
 	email text NOT NULL,
-	name char(50),
+	name varchar(50),
 	dateOfBirth date,
 	Primary Key(userId));
 
 CREATE TABLE WORK_EXPR(
-	userId char(50) NOT NULL,
-	company char(50) NOT NULL,
-	role char(50) NOT NULL,
-	location char(50),
+	userId varchar(50) NOT NULL,
+	company varchar(50) NOT NULL,
+	role varchar(50) NOT NULL,
+	location varchar(50),
 	startDate date,
 	endDate date,
 	PRIMARY KEY(userId,company,role,startDate));
 
 CREATE TABLE EDUCATIONAL_DETAILS(
-	userId char(50) NOT NULL,
-	instituitionName char(50) NOT NULL,
-	major char(50) NOT NULL,
-	degree char(50) NOT NULL,
+	userId varchar(50) NOT NULL,
+	instituitionName varchar(50) NOT NULL,
+	major varchar(50) NOT NULL,
+	degree varchar(50) NOT NULL,
 	startdate date,
 	enddate date,
 	PRIMARY KEY(userId,major,degree));
@@ -34,16 +34,16 @@ CREATE TABLE EDUCATIONAL_DETAILS(
 CREATE SEQUENCE message_msgId_seq start with 27812 increment by 1 minvalue 0;
 CREATE TABLE MESSAGE(
 	msgId integer default nextval('message_msgId_seq')UNIQUE NOT NULL,
-	senderId char(50) NOT NULL,
-	receiverId char(50) NOT NULL,
-	contents char(500) NOT NULL,
+	senderId varchar(50) NOT NULL,
+	receiverId varchar(50) NOT NULL,
+	contents varchar(500) NOT NULL,
 	sendTime timestamp,
 	deleteStatus integer,
-	status char(30) NOT NULL,
+	status varchar(30) NOT NULL,
 	PRIMARY KEY(msgId));
 
 CREATE TABLE CONNECTION_USR(
-	userId char(50) NOT NULL,
-	connectionId char(50) NOT NULL,
-	status char(30) NOT NULL,
+	userId varchar(50) NOT NULL,
+	connectionId varchar(50) NOT NULL,
+	status varchar(30) NOT NULL,
 	PRIMARY KEY(userId,connectionId));

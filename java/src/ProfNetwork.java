@@ -652,13 +652,18 @@ public class ProfNetwork {
             // friend count
             int fc = rs.size();
 
-            System.out.println("You currently have " + fc + " connections.");
+            System.out.println("You currently have " + fc + " connection(s).");
 
             if (fc > 0) {
-                System.out.println("Since you are not a new user, you are only able to request connections with those who are within 3 mutual connections to you.\n");
+                System.out.println(
+                    "Since you are not a new user, you are only able to " +
+                    "request connections with those who are within 3 mutual " +
+                    "connections to you.\n");
                 return false;
             } else {
-                System.out.println("As such, you are entitled to request up to 5 new connections.\n");
+                System.out.println(
+                    "As such, you are entitled to request up to 5 new " +
+                    "connections.\n");
                 return true;
             }
         }
@@ -697,18 +702,29 @@ public class ProfNetwork {
     // ---------------------------------------------------------------------
     public static void SendRequest(ProfNetwork esql, String currentUser) {
         try {
-            // TODO: Check if user is a new user (defined by not having any connections -- aka a loner)
-            //      if new user allow only max of 5 new connections
-            //      else allow only requests to people who are within 3 levels of connextion.
-
-
-            // Check if user is a "new user"
+            // check if user is a "new user"
             boolean n = isNewUser(esql, currentUser);
 
             // Ask who to send a request to
             System.out.print("Who would you like to send a request to: ");
             String userid = in.readLine();
             System.out.println();
+
+            // check if that user exists
+            // if user doesn't exist, exit function with error message
+            String query = null;
+            if (userExists(esql, userid)) {
+                query = String.format(
+                    "INSERT INTO CONNECTION_USR " +
+                    "VALUES('%s','%s','Request')",
+                    currentUser, userid);
+            }
+            else {
+                System.out.println(
+                "Your request could not be sent.\n" +
+                "The user: \"" + userid + "\" does not exist.\n");
+                return;
+            }
 
             // if new user allow only max of 5 new connections
             // else allow only requests to people who are within 3 levels of connextion.
@@ -720,26 +736,13 @@ public class ProfNetwork {
                 int rc = numRequests(esql, currentUser);
 
                 if (rc < maxrc) {
-                    // Check if that person exists
-                    if (userExists(esql, userid)) {
-                        String query = String.format(
-                            "INSERT INTO CONNECTION_USR " +
-                            "VALUES('%s','%s','Request')",
-                            currentUser, userid);
+                    esql.executeUpdate(query);
+                    rc++;
 
-                        esql.executeUpdate(query);
-                        rc++;
-
-                        System.out.println("Request to: \"" + userid + "\" sent.");
-                        System.out.println(
-                            "You have currently sent " + rc + " out of " +
-                            maxrc + " connection requests.\n");
-                    }
-                    else {
-                        System.out.println(
-                        "Your request could not be sent.\n" +
-                        "The user: \"" + userid + "\" does not exist.\n");
-                    }
+                    System.out.println("Request to \"" + userid + "\" sent.");
+                    System.out.println(
+                        "You have currently sent " + rc + " out of " +
+                        maxrc + " connection requests.\n");
                 }
                 else {
                     System.err.println(
@@ -751,6 +754,97 @@ public class ProfNetwork {
             }
             else {
                 // else allow only requests to people who are within 3 levels of connextion
+                // TODO: check if user is within the scope of 3 mutual connections
+
+                // for each active connection curr_user has
+                //      check each one
+                //      if request is in this list, stop and exQuery
+                //      get a list of active connections
+                //
+                //      for each active connection those users have
+                //          check each one
+                //          if request is in this list, stop and exQuery
+                //          get a list of active connections2
+                //
+                //          for each active connections those users have
+                //              check each one
+                //              if request is in this list, stop and exQuery
+                //              get a list of active connections2
+                //
+
+                boolean isWithinScope = false;
+
+                String q1 = String.format(
+                    "SELECT C.connectionId " +
+                    "FROM CONNECTION_USR C " +
+                    "WHERE C.userId = '%s' AND C.status = 'Accept'",
+                    currentUser);
+                List<List<String>> rs1 = esql.executeQueryAndReturnResult(q1);
+
+                for (List<String> ls1 : rs1) {
+                    for (String s1 : ls1) {
+                        if (userid.equals(s1)) {
+                            isWithinScope = true;
+                            break;
+                        }
+                        else {
+                            String q2 = String.format(
+                                "SELECT C.connectionId " +
+                                "FROM CONNECTION_USR C " +
+                                "WHERE C.userId = '%s' AND C.status = 'Accept'",
+                                s1);
+                            List<List<String>> rs2 =
+                                esql.executeQueryAndReturnResult(q2);
+
+                            for (List<String> ls2 : rs2) {
+                                for(String s2 : ls2) {
+                                    s2.trim();
+                                    if (userid.equals(s2)) {
+                                        isWithinScope = true;
+                                        break;
+                                    }
+                                    else {
+                                        String q3 = String.format(
+                                            "SELECT C.connectionId " +
+                                            "FROM CONNECTION_USR C " +
+                                            "WHERE C.userId = '%s' " +
+                                            "AND C.status = 'Accept'",
+                                            s2);
+                                        List<List<String>> rs3 =
+                                        esql.executeQueryAndReturnResult(q3);
+
+                                        for (List<String> ls3 : rs3) {
+                                            for (String s3 : ls3) {
+                                                System.out.println(s3);
+                                                if (userid.equals(s3)) {
+                                                    isWithinScope = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (isWithinScope) {
+                    query = String.format(
+                    "INSERT INTO CONNECTION_USR " +
+                    "VALUES('%s','%s','Request')",
+                    currentUser, userid);
+
+                    esql.executeUpdate(query);
+
+                    System.out.println("Request to \"" + userid + "\" sent.\n");
+                }
+                else {
+                    System.out.println(
+                        "The user \"" + userid + " is not within 3 mutual " +
+                        "connections. " +
+                        "As such, your request has not been sent.");
+                }
             }
         }
         catch (Exception e) {
@@ -763,6 +857,56 @@ public class ProfNetwork {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Rest of the functions definition go in here
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }//end ProfNetwork
