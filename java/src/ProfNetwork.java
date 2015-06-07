@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Timestamp;
+import java.sql.Timestamp;
 
 /**
 * This class defines a simple embedded SQL utility class that is designed to
@@ -407,8 +407,6 @@ public class ProfNetwork {
             if (userNum > 0) {
                 System.out.println("Welcome: "+login+" | "+realName+"\n\n");
                 current_user = login;
-                Timestamp ts = new Timestamp(System.currentTimeMillis());
-                System.out.println(ts);
                 return login;
             }
             else
@@ -479,12 +477,12 @@ public class ProfNetwork {
                 String content = null;
                 System.out.print("\t\tWhat would you like to say: ");
                 content = in.readLine();
-                String time = "2011-10-09 21:49:41 -0700";
+                Timestamp ts = new Timestamp(System.currentTimeMillis());
                 String status = "sent";
                 int ds = 0;
                 //String output1 = String.format("senderid =  " + current_user + "\nreceiverid =  " + to + "\nconetent =  " + content + "\nsendtime =  "+ time + "\ndeletestatus =  "+ ds +"\nstatus =  " + status);
                 //System.out.println(output1);
-                String query = String.format("INSERT INTO message(senderid,receiverid,contents,sendtime,deletestatus,status) VALUES ('%s','%s','%s','%s',%s,'%s')", current_user, to, content, time, ds, status);
+                String query = String.format("INSERT INTO message(senderid,receiverid,contents,sendtime,deletestatus,status) VALUES ('%s','%s','%s','%s',%s,'%s')", current_user, to, content, ts, ds, status);
                 esql.executeUpdate(query);
                 String output = String.format("\n\nSUCCESSFULLY SENT MESSAGE TO %s \n\n",to);
                 System.out.println(output);
@@ -557,6 +555,9 @@ public class ProfNetwork {
                 String query = String.format("UPDATE message SET deletestatus=5 where receiverId='%s' and msgId='%s' ",current_user,mid);
                 esql.executeUpdate(query);
                 //System.out.println("SUCCESSFULLY UPDATED DELETE STATUS TO 5");
+                System.out.printf("\tMessage %s successfully deleted from your inbox.\n",mid);
+                String query2 = String.format("UPDATE message SET status='deleted' WHERE message.receiverid='%s' AND message.msgId=%s",current_user,mid);
+                esql.executeUpdate(query2);
             }
             else
             {
