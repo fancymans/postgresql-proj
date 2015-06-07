@@ -1,4 +1,7 @@
 /*
+ * Team 14
+ * Darren Trang 861007779
+ * Darrin Lin 860988334
 * Template JAVA User Interface
 * =============================
 *
@@ -282,7 +285,8 @@ public class ProfNetwork {
                         System.out.println("4. Send Friend Request");
 						System.out.println("5. Search for someone");
                         System.out.println("6. View Messages");
-                        //System.out.println("6. Check if user exsits");
+                        System.out.println("7. Check status of sent messages");
+                        System.out.println("8. Delete message");
                         System.out.println("-------------------------");
                         System.out.println("9. Log out");
                         System.out.println("-------------------------");
@@ -293,6 +297,8 @@ public class ProfNetwork {
                             case 4: SendRequest(esql, authorisedUser); break;
                             case 5: Search(esql);break;
                             case 6: ViewMessages(esql);break;
+                            case 7: StatusOfSentMessages(esql); break;
+                            case 8: DeleteMessage(esql); break;
 							case 9: usermenu = false; break;
                             default : System.out.println("Unrecognized choice!"); break;
                         }
@@ -414,21 +420,6 @@ public class ProfNetwork {
     }//end
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // ---------------------------------------------------------------------
     // list out user's friends
     // ---------------------------------------------------------------------
@@ -507,7 +498,7 @@ public class ProfNetwork {
     // ---------------------------------------------------------------------
     public static void ViewMessages(ProfNetwork esql){
         try{
-            String query = String.format("SELECT R.msgId, R.senderId, R.contents, R.sendTime FROM MESSAGE R WHERE R.receiverId = '%s' ", current_user);
+            String query = String.format("SELECT R.msgId, R.senderId, R.contents, R.sendTime FROM MESSAGE R WHERE R.receiverId = '%s' AND R.deleteStatus=0 ", current_user);
             int i = esql.executeQueryAndPrintResult(query);
             System.out.println("");
             if(i < 0)
@@ -519,11 +510,59 @@ public class ProfNetwork {
             {
                 System.out.println("\nYou have 0 Messages");
             }
+            String query2 = String.format("UPDATE message SET status='read' WHERE message.receiverid='%s'",current_user);
+            esql.executeUpdate(query2);
+            //System.out.println("UPDATED MESSAGES TO 'READ'");
         }catch(Exception e){
             System.err.println(e.getMessage());
         }
     }
 
+    // ---------------------------------------------------------------------
+    // check if messages sent have been "read"
+    // ---------------------------------------------------------------------
+    public static void StatusOfSentMessages(ProfNetwork esql) {
+        try{
+            String query = String.format("SELECT R.receiverId, R.contents, R.sendTime, R.status FROM message R WHERE R.senderId='%s'",current_user);
+            int i = esql.executeQueryAndPrintResult(query);
+            if(i<0)
+                System.out.println("ERROR IN StatusOfSentMessages()");
+            List<List<String>> result = esql.executeQueryAndReturnResult(query);
+            if(result.isEmpty())
+            {
+                System.out.println("\nYou sent 0 Messages");
+            }
+
+        } catch(Exception e){
+            System.err.println(e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // delete message   REMEMBER DATABSE UPDATED SO THAT ALL MESSAGES HAVE DS=0
+    // -------------------------------------------------------------------------
+    public static void DeleteMessage(ProfNetwork esql){
+        try{
+            ViewMessages(esql);
+            System.out.print("\t\tEnter the msgId of the message you want to delete: ");
+            int mid = Integer.parseInt(in.readLine());
+            String query_check_valid_mid = String.format("SELECT * FROM message WHERE message.receiverId='%s' AND message.msgId=%s",current_user,mid);
+            List<List<String>> result = esql.executeQueryAndReturnResult(query_check_valid_mid);
+            if(!result.isEmpty())
+            {
+                String query = String.format("UPDATE message SET deletestatus=5 where receiverId='%s' and msgId='%s' ",current_user,mid);
+                esql.executeUpdate(query);
+                //System.out.println("SUCCESSFULLY UPDATED DELETE STATUS TO 5");
+            }
+            else
+            {
+                System.out.printf("\t\tError: msgId: %s does not exist in your inbox\n",mid);
+            }
+        } catch(Exception e){
+            System.out.println("ERROR: please enter an integer. No letters");
+            //System.err.println(e.getMessage());
+        }
+    }
 
     // ---------------------------------------------------------------------
     // search by input
@@ -607,7 +646,7 @@ public class ProfNetwork {
             return true;
         }
         catch (Exception e) {
-            System.out.println("userExists() caught exception");
+            System.out.println("userExistsAndPrint() caught exception");
         }
         return true;
     }
