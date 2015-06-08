@@ -490,6 +490,71 @@ public class ProfNetwork {
     }
 
 
+    public static void GetAndPrintEduDet(ProfNetwork esql, String userid) {
+        try {
+            String query = String.format(
+                "SELECT E.instituitionName, E.major, E.degree, E.startdate, E.enddate " +
+                "FROM EDUCATIONAL_DETAILS E " +
+                "WHERE E.userId = '%s'",
+                userid);
+            List<List<String>> rs = esql.executeQueryAndReturnResult(query);
+
+            System.out.println("\t-------------------------------------------");
+            System.out.println("\tEducation Details:");
+
+            if (rs.size() == 0) {
+                System.out.println("\t" + userid + " has no education details.\n");
+                return;
+            }
+
+            System.out.println();
+            for (List<String> ls : rs) {
+                for (String s : ls) {
+                    System.out.print("\t");
+                    System.out.println(s);
+                }
+                System.out.println();
+            }
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+
+    public static void GetAndPrintWorkExp(ProfNetwork esql, String userid) {
+        try {
+            String query = String.format(
+                "SELECT W.company, W.role, W.location, W.startdate, W.enddate " +
+                "FROM WORK_EXPR W " +
+                "WHERE W.userId = '%s'",
+                userid);
+
+            List<List<String>> rs = esql.executeQueryAndReturnResult(query);
+
+            System.out.println("\t-------------------------------------------");
+            System.out.println("\tWork Details:");
+
+            if (rs.size() == 0) {
+                System.out.println("\t" + userid + " has no work experience.\n");
+                return;
+            }
+
+            System.out.println();
+            for (List<String> ls : rs) {
+                for (String s : ls) {
+                    System.out.print("\t");
+                    System.out.println(s);
+                }
+                System.out.println();
+            }
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+
     // ---------------------------------------------------------------------
     // list out user's friends
     // ---------------------------------------------------------------------
@@ -515,11 +580,14 @@ public class ProfNetwork {
 
                 String n = GetName(esql, userid);
                 String e = GetEmail(esql, userid);
-
+                System.out.println("\t-------------------------------------------");
                 System.out.println("\t" + userid + "'s Profile");
+                System.out.println("\t-------------------------------------------");
                 System.out.println("\tName:\t" + n);
                 System.out.println("\tEmail:\t" + e);
                 System.out.println();
+                GetAndPrintEduDet(esql, userid);
+                GetAndPrintWorkExp(esql, userid);
                 System.out.println("\tWhat would you like to do: ");
                 System.out.println("\t1. View " + userid + "'s friends");
                 System.out.println("\t2. Send a message to " + userid);
